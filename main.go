@@ -6,18 +6,23 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"time"
 )
 
 var TodoList []Todo
+var Path string = "/tmp/todos.json"
 
 type Todo struct {
-	Id   uint64 `json:"id"`
-	Task string `json:"task"`
+	Id         string `json:"id"`
+	Start_time string `json:"time"`
+	End_time   string `json:"start_time"`
+	Task       string `json:"task"`
+	Mark_done  bool   `json:"mark_done"`
 }
 
 func main() {
-	path := "todos.json"
-	TodoList = readTodos(path)
+
+	TodoList = readTodos(Path)
 
 	command := os.Args
 
@@ -42,12 +47,13 @@ func main() {
 		printGuide()
 
 	case "done", "d":
-		id := command[2]
+		id := command[2:]
 		markDone(id, TodoList)
 	default:
 		printDefault()
 	}
 
+	fmt.Printf("\n")
 }
 
 func readTodos(path string) []Todo {
@@ -75,20 +81,23 @@ func saveFile(TodoList []Todo) (string, error) {
 	if err != nil {
 		return "Error while removing todo : marshaling", err
 	}
-	err = os.WriteFile("todos.json", data, 0644)
+	err = os.WriteFile(Path, data, 0644)
 	if err != nil {
 		return "Error while saving todos", err
 	} else {
-		return "saved", nil
+		return "file saved", nil
 	}
 }
 
 func addTodo(newTodos []string) {
 	for _, i := range newTodos {
-		noOfTodos := len(TodoList)
+		id := len(TodoList) + 1
 		NewTodo := Todo{
-			Id:   uint64(noOfTodos) + 1,
-			Task: i,
+			Id:         strconv.FormatInt(int64(id), 10),
+			Start_time: time.Now().Add(5*time.Hour + 30*time.Minute).Format(time.Kitchen),
+			End_time:   "",
+			Task:       i,
+			Mark_done:  false,
 		}
 		TodoList = append(TodoList, NewTodo)
 	}
@@ -96,49 +105,60 @@ func addTodo(newTodos []string) {
 	msg, err := saveFile(TodoList)
 	if err != nil {
 		fmt.Printf(msg, err)
+	} else {
+		for _, t := range newTodos {
+			fmt.Printf("%v : saved\n", t)
+		}
 	}
-	fmt.Println(msg)
 }
 
 func listTodos(TodoList []Todo) {
-	if len(TodoList) == 0 {
-		fmt.Printf("Todos is empty\n")
-	}
 
-	fmt.Printf("\n-----------Todo List-------------\n")
+	fmt.Printf("\n---------------- Todo List ------------------\n")
+	if len(TodoList) == 0 {
+		fmt.Printf("\n		[ Empty ]				\n\n\nUse this to add tasks in todo list\n-> tm add 'your task'\n")
+	}
 	var todo Todo
 	for _, todo = range TodoList {
-		fmt.Printf("[%v] -> %v\n", todo.Id, todo.Task)
+		fmt.Printf("[%v] %v%v -> %v\n", todo.Id, todo.Start_time, todo.End_time, todo.Task)
 	}
 }
 
 func removeTodos(ids []string, TodoList []Todo) {
 	var newTodoList []Todo
+	var ids_task []string
 	newTodoList = TodoList
 	for _, id := range ids {
 		var temp []Todo
 		for _, todo := range newTodoList {
-			if strconv.FormatUint(todo.Id, 10) != id {
+			if todo.Id != id {
 				temp = append(temp, todo)
+			} else {
+				ids_task = append(ids_task, todo.Task)
 			}
 		}
 		newTodoList = temp
 	}
 
 	for index := range newTodoList {
-		newTodoList[index].Id = uint64(index + 1)
+		newTodoList[index].Id = strconv.FormatInt(int64(index+1), 10)
 	}
 
 	msg, err := saveFile(newTodoList)
 	if err != nil {
 		fmt.Printf(msg, err)
+	} else {
+		for _, t := range ids_task {
+			fmt.Printf("%v : removed\n", t)
+		}
 	}
-	fmt.Println("removed")
 }
 
 func editTodo(id string, newTask string, TodoList []Todo) {
+	var prev_task string
 	for index := range TodoList {
-		if strconv.FormatUint(TodoList[index].Id, 10) == id {
+		if TodoList[index].Id == id {
+			prev_task = TodoList[index].Task
 			TodoList[index].Task = newTask
 		}
 	}
@@ -146,23 +166,40 @@ func editTodo(id string, newTask string, TodoList []Todo) {
 	msg, err := saveFile(TodoList)
 	if err != nil {
 		fmt.Printf(msg, err)
+	} else {
+		fmt.Printf("%v -> %v : Renamed", prev_task, newTask)
 	}
-	fmt.Println(msg)
 }
 
-func markDone(id string, TodoList []Todo) {
-	mark_done := "[done]"
-	for index := range TodoList {
-		if strconv.FormatUint(TodoList[index].Id, 10) == id {
-			TodoList[index].Task = fmt.Sprintf("%v %s", TodoList[index].Task, mark_done)
+func markDone(ids []string, TodoList []Todo) {
+	mark_done := "\033[32m[done]\033[0m"
+	done_time := time.Now().Add(5*time.Hour + 30*time.Minute).Format(time.Kitchen)
+	var id_task []string
+	for _, id := range ids {
+		for index := range TodoList {
+			if TodoList[index].Id == id {
+				if !TodoList[index].Mark_done {
+					id_task = append(id_task, TodoList[index].Task)
+					TodoList[index].Id = fmt.Sprintf("\033[2m%v\033[0m", TodoList[index].Id)
+					TodoList[index].Start_time = fmt.Sprintf("\033[2m%v : \033[0m", TodoList[index].Start_time)
+					TodoList[index].End_time = fmt.Sprintf("\033[2m%v\033[0m", done_time)
+					TodoList[index].Task = fmt.Sprintf("\033[2m%v\033[0m %s", TodoList[index].Task, mark_done)
+					TodoList[index].Mark_done = true
+				} else {
+					fmt.Println("Aready marked as done")
+				}
+			}
 		}
 	}
 
 	msg, err := saveFile(TodoList)
 	if err != nil {
 		fmt.Printf(msg, err)
+	} else {
+		for _, t := range id_task {
+			fmt.Printf("%v : marked done\n", t)
+		}
 	}
-	fmt.Println(msg)
 }
 
 func printGuide() {
