@@ -38,6 +38,14 @@ func main() {
 		newTask := command[3]
 		editTodo(id, newTask, TodoList)
 
+	case "help", "h":
+		printGuide()
+
+	case "done", "d":
+		id := command[2]
+		markDone(id, TodoList)
+	default:
+		printDefault()
 	}
 
 }
@@ -140,4 +148,48 @@ func editTodo(id string, newTask string, TodoList []Todo) {
 		fmt.Printf(msg, err)
 	}
 	fmt.Println(msg)
+}
+
+func markDone(id string, TodoList []Todo) {
+	mark_done := "[done]"
+	for index := range TodoList {
+		if strconv.FormatUint(TodoList[index].Id, 10) == id {
+			TodoList[index].Task = fmt.Sprintf("%v %s", TodoList[index].Task, mark_done)
+		}
+	}
+
+	msg, err := saveFile(TodoList)
+	if err != nil {
+		fmt.Printf(msg, err)
+	}
+	fmt.Println(msg)
+}
+
+func printGuide() {
+	fmt.Printf("\nTo List all task from the todo list\n")
+	fmt.Printf("-> tm list or \n-> tm ls [recomended] \nExample - tm ls  //lists all the task\n\n")
+
+	fmt.Printf("To add a task in todo list\n")
+	fmt.Printf("-> tm add 'your task here' \n-> tm a 'your task here'[recomended] \nExample - tm a 'code mf'\n\n")
+
+	fmt.Printf("To remove a task from the todo list\n")
+	fmt.Printf("-> tm remove task no. \n-> tm rm task no.[recomended] \nExample - tm rm 1 //removes the first task in the todolist\n\n")
+
+	fmt.Printf("To Rename a task \n")
+	fmt.Printf("-> tm edit task no. 'renamed task' or \n-> tm rm task no. 'renamed task'[recomended] \nExample - tm e 2 'did you start?' //rename the 2 task in the todolist to word renamed\n\n")
+
+	fmt.Printf("To remove a task from the todo list\n")
+	fmt.Printf("-> tm remove task no. \n-> tm rm task no.[recomended] \nExample - tm rm 2 //removes the 2 task in the todolist\n\n")
+
+	fmt.Printf("To mark a task as done\n")
+	fmt.Printf("-> tm done task no. \n-> tm d task no.[recomended] \nExample - tm d 2 //mark the task 2 as done in the todolist\n\n")
+
+	fmt.Printf("For help\n")
+	fmt.Printf("-> tm help \n-> tm h [recomended] \n\n")
+
+}
+
+func printDefault() {
+	fmt.Printf("Invalid command: Below are the valid commands that you can use")
+	printGuide()
 }
