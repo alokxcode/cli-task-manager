@@ -5,76 +5,139 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strconv"
 )
 
 var TodoList []Todo
 
 type Todo struct {
-	Id   uint   `json:"id"`
+	Id   uint64 `json:"id"`
 	Task string `json:"task"`
 }
 
 func main() {
-	_, err := os.Lstat("todos.json")
-	var IsfileExist bool
-	if err != nil {
-		IsfileExist = false
-	} else {
-		IsfileExist = true
-	}
+	path := "todos.json"
+	TodoList = readTodos(path)
 
-	if IsfileExist {
-		data, err := os.ReadFile("todos.json")
-		if err != nil {
-			fmt.Println("Error while Reading todos.json")
-		}
-		err = json.Unmarshal(data, &TodoList)
-		if err != nil {
-			fmt.Println("Error while unmarshalling todos.json", err)
-		}
-		fmt.Println(TodoList)
-	}
-
-	var newTodo string
 	command := os.Args
 
 	switch command[1] {
-	case "add":
-		var word string
-		for _, word = range command[2:] {
-			newTodo = fmt.Sprintf("%v %v", newTodo, word)
-		}
+	case "add", "a":
+		newTodos := command[2:]
+		addTodo(newTodos)
 
-		noOfTodos := len(TodoList)
-		NewTodo := Todo{
-			Id:   uint(noOfTodos) + 1,
-			Task: newTodo,
-		}
+	case "list", "ls":
+		listTodos(TodoList)
 
-		TodoList = append(TodoList, NewTodo)
-		data, _ := json.Marshal(TodoList)
-		err = os.WriteFile("todos.json", data, 0644)
-		if err != nil {
-			fmt.Println("Error while saving todo", err)
-		} else {
-			fmt.Println(newTodo, "saved")
-		}
+	case "rm", "remove":
+		ids := command[2:]
+		removeTodos(ids, TodoList)
 
-	case "tdlist":
+	case "edit", "e":
+		id := command[2]
+		newTask := command[3]
+		editTodo(id, newTask, TodoList)
 
 	}
 
-	// reader := bufio.NewReader(os.Stdin)
+}
 
-	// fmt.Printf("Add Todo -> ")
-	// newTodo, _ = reader.ReadString('\n')
+func readTodos(path string) []Todo {
+	var todoList []Todo
+	_, err := os.Lstat(path)
+	if err != nil {
+		return todoList
+	} else {
+		data, err := os.ReadFile(path)
+		if err != nil {
+			fmt.Println("Error while Reading todos.json")
+		}
+		err = json.Unmarshal(data, &todoList)
+		if err != nil {
+			fmt.Println("Error while unmarshalling todos.json", err)
+		}
+	}
 
-	// var todo = Todo{
-	// 	task: newTodo,
-	// }
+	return todoList
 
-	// Todos = append(Todos, todo)
+}
 
-	// println("-------------------Your Todos----------------------")
+func saveFile(TodoList []Todo) (string, error) {
+	data, err := json.Marshal(TodoList)
+	if err != nil {
+		return "Error while removing todo : marshaling", err
+	}
+	err = os.WriteFile("todos.json", data, 0644)
+	if err != nil {
+		return "Error while saving todos", err
+	} else {
+		return "saved", nil
+	}
+}
 
+func addTodo(newTodos []string) {
+	for _, i := range newTodos {
+		noOfTodos := len(TodoList)
+		NewTodo := Todo{
+			Id:   uint64(noOfTodos) + 1,
+			Task: i,
+		}
+		TodoList = append(TodoList, NewTodo)
+	}
+
+	msg, err := saveFile(TodoList)
+	if err != nil {
+		fmt.Printf(msg, err)
+	}
+	fmt.Println(msg)
+}
+
+func listTodos(TodoList []Todo) {
+	if len(TodoList) == 0 {
+		fmt.Printf("Todos is empty\n")
+	}
+
+	fmt.Printf("\n-----------Todo List-------------\n")
+	var todo Todo
+	for _, todo = range TodoList {
+		fmt.Printf("[%v] -> %v\n", todo.Id, todo.Task)
+	}
+}
+
+func removeTodos(ids []string, TodoList []Todo) {
+	var newTodoList []Todo
+	newTodoList = TodoList
+	for _, id := range ids {
+		var temp []Todo
+		for _, todo := range newTodoList {
+			if strconv.FormatUint(todo.Id, 10) != id {
+				temp = append(temp, todo)
+			}
+		}
+		newTodoList = temp
+	}
+
+	for index := range newTodoList {
+		newTodoList[index].Id = uint64(index + 1)
+	}
+
+	msg, err := saveFile(newTodoList)
+	if err != nil {
+		fmt.Printf(msg, err)
+	}
+	fmt.Println("removed")
+}
+
+func editTodo(id string, newTask string, TodoList []Todo) {
+	for index := range TodoList {
+		if strconv.FormatUint(TodoList[index].Id, 10) == id {
+			TodoList[index].Task = newTask
+		}
+	}
+
+	msg, err := saveFile(TodoList)
+	if err != nil {
+		fmt.Printf(msg, err)
+	}
+	fmt.Println(msg)
 }
