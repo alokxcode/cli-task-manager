@@ -10,7 +10,9 @@ import (
 )
 
 var TodoList []Todo
-var Path string
+var File_Path string
+var Dir_Path string
+var Tm_Path string = "/home/manavya/task-manager"
 
 type Todo struct {
 	Id         string `json:"id"`
@@ -21,33 +23,65 @@ type Todo struct {
 }
 
 func main() {
+	dir_err := os.MkdirAll(Tm_Path, 0755)
+	if dir_err != nil {
+		fmt.Println(dir_err)
+		return
+	}
+
+	// check if dir_path.txt exits in the tmp folder or not
+	_, path_err := os.Lstat("/tmp/dir_path.txt")
+
+	// if dir_path.txt doesn't exists- create
+	if path_err != nil {
+		data := []byte(Tm_Path)                              // default path would be task manager home path
+		err := os.WriteFile("/tmp/dir_path.txt", data, 0644) // create by writing default path in dir_path.txt
+		if err != nil {
+			fmt.Printf("Error while creating path.txt : %v", err)
+			return
+		} else {
+			Dir_Path = Tm_Path
+		}
+	}
+
+	// if dir_path already exists
+
+	// then read the current directory from dir_path.txt
+	data, readingFile_err := os.ReadFile("/tmp/dir_path.txt")
+	if readingFile_err != nil {
+		fmt.Println(readingFile_err)
+	}
+
+	// set the read directory as Dir_Path
+	Dir_Path = string(data)
+
 	_, err := os.Lstat("/tmp/path.txt")
 	if err != nil {
-		path := "/tmp/todos.json"
+		path := fmt.Sprintf("%v/todos.json", Dir_Path)
 		data := []byte(path)
 		err := os.WriteFile("/tmp/path.txt", data, 0644)
 		if err != nil {
 			fmt.Printf("Error while creating path.txt : %v", err)
 			return
 		} else {
-			Path = path
+			File_Path = path
 		}
 	}
 
-	data, err := os.ReadFile("/tmp/path.txt")
+	data, err = os.ReadFile("/tmp/path.txt")
 	if err != nil {
 		fmt.Println(err)
 	}
-	Path = string(data)
+	File_Path = string(data)
 
-	TodoList = readTodos(Path)
+	TodoList = readTodos(File_Path)
 
 	command := os.Args
 
 	switch command[1] {
 	case "add", "a":
 		newTodos := command[2:]
-		fmt.Println(Path)
+		fmt.Println(File_Path)
 		addTodo(newTodos)
 
 	case "list", "ls":
@@ -72,20 +106,30 @@ func main() {
 	case "touch":
 		file_name := command[2]
 		var first_task string
+
+		// check if user has given the first task in command or not
 		if len(command) < 4 {
+			// default first task
 			first_task = "New Todo file Created"
 		} else {
 			first_task = command[3]
 		}
+		fmt.Println(Dir_Path)
 
-		path_string := fmt.Sprintf("/tmp/%v.json", file_name)
+		// return the formated file path
+		path_string := fmt.Sprintf("%v/%v.json", Dir_Path, file_name)
+
+		// saves the formated file path in path.txt
 		data := []byte(path_string)
 		err := os.WriteFile("/tmp/path.txt", data, 0644)
 		if err != nil {
 			fmt.Printf("Error while creating path.txt : %v", err)
 			return
 		}
+
+		// creates a new file with a dummy task
 		var todolist []Todo
+		// creating first task
 		NewTodo := Todo{
 			Id:         "1",
 			Start_time: time.Now().Add(5*time.Hour + 30*time.Minute).Format(time.Kitchen),
@@ -96,23 +140,43 @@ func main() {
 		todolist = append(todolist, NewTodo)
 		fmt.Println(todolist)
 		todolist_byte, _ := json.Marshal(todolist)
+
+		// creating the file with first task
 		err = os.WriteFile(path_string, todolist_byte, 0644)
 		if err != nil {
-			fmt.Println("Error while creating", path_string)
+			fmt.Println("Error while creating", path_string, err)
 		}
 
-	case "cd":
+	case "cf":
 		file_name := command[2]
-		path_string := fmt.Sprintf("/tmp/%v.json", file_name)
+		path_string := fmt.Sprintf("%v/%v.json", Dir_Path, file_name)
 		data := []byte(path_string)
 		err := os.WriteFile("/tmp/path.txt", data, 0644)
 		if err != nil {
 			fmt.Printf("Error while changing directory to %v.json : %v", file_name, err)
 			return
 		}
+	case "cd":
+		dir_name := command[2]
+		path_string := fmt.Sprintf("%v/%v", Dir_Path, dir_name)
+		data := []byte(path_string)
+		err := os.WriteFile("/tmp/dir_path.txt", data, 0644)
+		if err != nil {
+			fmt.Printf("Error while changing directory to %v.json : %v", dir_name, err)
+			return
+		}
 
 	case "pwd":
-		fmt.Println(Path)
+		fmt.Println(File_Path)
+		fmt.Println(Dir_Path)
+
+	case "mkdir":
+		dir_name := command[2]
+		path_string := fmt.Sprintf("%v/%v", Dir_Path, dir_name)
+		err = os.MkdirAll(path_string, 0755)
+		if err != nil {
+			fmt.Println("Error while creating", path_string, err)
+		}
 
 	default:
 		printDefault()
@@ -145,7 +209,7 @@ func saveFile(TodoList []Todo) (string, error) {
 	if err != nil {
 		return "Error while removing todo : marshaling", err
 	}
-	err = os.WriteFile(Path, data, 0644)
+	err = os.WriteFile(File_Path, data, 0644)
 	if err != nil {
 		return "Error while saving todos", err
 	} else {
