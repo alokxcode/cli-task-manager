@@ -22,8 +22,24 @@ type Todo struct {
 	Mark_done  bool   `json:"mark_done"`
 }
 
+// var FDList []Dir
+
+// type Dir struct {
+// 	Files      []string
+// 	Directorys []Dir
+// }
+
+// type home struct {
+
+// }
+
 func main() {
 	dir_err := os.MkdirAll(Tm_Path, 0755)
+	// var dir = Dir {
+	// 	Directorys: ,
+	// }
+	// FDList = append(FDList, )
+	// os.WriteFile()
 	if dir_err != nil {
 		fmt.Println(dir_err)
 		return
