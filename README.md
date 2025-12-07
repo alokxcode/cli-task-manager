@@ -56,7 +56,8 @@ Add this to your shell config as well:
 
 4. **Reload your terminal**  
    ```bash
-   source ~/.bashrc``````
+   source ~/.bashrc
+   ``````
 
 or source the configuration file you edited
 text
