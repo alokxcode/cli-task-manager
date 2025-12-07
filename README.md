@@ -50,7 +50,8 @@ Navigate your task folders just like you would in a Linux shell — no GUI, no d
 Add this to your shell config as well:
 
  ```
- alias tm='main'```bash
+ alias tm='main'
+ ```bash
 
 
 4. **Reload your terminal**  
