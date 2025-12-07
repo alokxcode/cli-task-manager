@@ -83,9 +83,9 @@ tm edit 2 "Update README introduction"
 ``````
 
 
-- Delete a task: 
+- Remove a task: 
 ```bash 
-tm delete 3
+tm remove 3
 ``````
 
 - Create folders:
