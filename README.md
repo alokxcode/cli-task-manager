@@ -67,31 +67,42 @@ text
 ## 🧪 Usage Examples
 
 - Create a new task file:  
+```bash
 tm touch todo.txt
+``````
 
-- Add a task:  
+- Add a task: 
+```bash 
 tm add "Finish documentation"
+``````
 
 
 - Edit a task:  
+```bash
 tm edit 2 "Update README introduction"
+``````
 
 
-- Delete a task:  
+- Delete a task: 
+```bash 
 tm delete 3
+``````
 
-
-- Create folders:  
+- Create folders:
+```bash  
 tm mkdir projectA
+``````
 
 
 - Navigate directories:  
+```bash
 tm cd projectA
-
+``````
 
 - List everything:  
+```bash
 tm ls
-
+``````
 
 ---
 
