@@ -49,6 +49,7 @@ Navigate your task folders just like you would in a Linux shell — no GUI, no d
 3. **Create an alias**  
 Add this to your shell config as well:
 
+```bash
 alias tm='main'
 
 
