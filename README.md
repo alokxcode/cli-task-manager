@@ -44,13 +44,13 @@ Navigate your task folders just like you would in a Linux shell — no GUI, no d
    Add the following line to your `.bashrc`, `.zshrc`, or shell config:
 
    ```bash
-   export PATH="$PATH:/path/to/your/downloaded/executable"```
+   export PATH="$PATH:/path/to/your/downloaded/executable"
 
 3. **Create an alias**  
 Add this to your shell config as well:
 
  ```bash
-alias tm='main'
+alias tm='main'```
 
 
 4. **Reload your terminal**  
