@@ -12,7 +12,8 @@ Perfect for developers who like terminal workflows or want a lightweight, keyboa
 ### ✅ **Task Management**
 - Add tasks  
 - Edit tasks  
-- Delete tasks  
+- Delete tasks
+- Mark tasks as done 
 - List all tasks  
 
 ### 📂 **File & Folder Operations**
@@ -82,6 +83,10 @@ tm add "Finish documentation"
 tm edit 2 "Update README introduction"
 ``````
 
+- Mark a task as done: 
+```bash 
+tm done 3
+``````
 
 - Remove a task: 
 ```bash 
