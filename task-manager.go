@@ -11,8 +11,11 @@ import (
 
 var TodoList []Todo
 var File_Path string
-var Dir_Path string
-var Tm_Path string = "/home/manavya/task-manager"
+
+// var Dir_Path string
+var Tm_Path string = "/tmp"
+
+var Files_Path string = "/tmp/files.json"
 
 type Todo struct {
 	Id         string `json:"id"`
@@ -22,58 +25,50 @@ type Todo struct {
 	Mark_done  bool   `json:"mark_done"`
 }
 
-// var FDList []Dir
+type Files struct {
+	Name string `json:"name"`
+	Path string `json:"path"`
+}
 
-// type Dir struct {
-// 	Files      []string
-// 	Directorys []Dir
-// }
-
-// type home struct {
-
-// }
+var FilesList []Files
 
 func main() {
-	dir_err := os.MkdirAll(Tm_Path, 0755)
-	// var dir = Dir {
-	// 	Directorys: ,
+	// dir_err := os.MkdirAll(Tm_Path, 0755)
+
+	// if dir_err != nil {
+	// 	fmt.Println(dir_err)
+	// 	return
 	// }
-	// FDList = append(FDList, )
-	// os.WriteFile()
-	if dir_err != nil {
-		fmt.Println(dir_err)
-		return
-	}
 
 	// check if dir_path.txt exits in the tmp folder or not
-	_, path_err := os.Lstat("/tmp/dir_path.txt")
+	// _, path_err := os.Lstat("/tmp/dir_path.txt")
 
-	// if dir_path.txt doesn't exists- create
-	if path_err != nil {
-		data := []byte(Tm_Path)                              // default path would be task manager home path
-		err := os.WriteFile("/tmp/dir_path.txt", data, 0644) // create by writing default path in dir_path.txt
-		if err != nil {
-			fmt.Printf("Error while creating path.txt : %v", err)
-			return
-		} else {
-			Dir_Path = Tm_Path
-		}
-	}
+	// // if dir_path.txt doesn't exists- create
+	// if path_err != nil {
+	// 	data := []byte(Tm_Path)                              // default path would be task manager home path
+	// 	err := os.WriteFile("/tmp/dir_path.txt", data, 0644) // create by writing default path in dir_path.txt
+	// 	if err != nil {
+	// 		fmt.Printf("Error while creating path.txt : %v", err)
+	// 		return
+	// 	} else {
+	// 		Dir_Path = Tm_Path
+	// 	}
+	// }
 
 	// if dir_path already exists
 
 	// then read the current directory from dir_path.txt
-	data, readingFile_err := os.ReadFile("/tmp/dir_path.txt")
-	if readingFile_err != nil {
-		fmt.Println(readingFile_err)
-	}
+	// data, readingFile_err := os.ReadFile("/tmp/dir_path.txt")
+	// if readingFile_err != nil {
+	// 	fmt.Println(readingFile_err)
+	// }
 
-	// set the read directory as Dir_Path
-	Dir_Path = string(data)
+	// // set the read directory as Dir_Path
+	// Dir_Path = string(data)
 
 	_, err := os.Lstat("/tmp/path.txt")
 	if err != nil {
-		path := fmt.Sprintf("%v/todos.json", Dir_Path)
+		path := fmt.Sprintf("%v/todos.json", Tm_Path)
 		data := []byte(path)
 		err := os.WriteFile("/tmp/path.txt", data, 0644)
 		if err != nil {
@@ -84,13 +79,43 @@ func main() {
 		}
 	}
 
-	data, err = os.ReadFile("/tmp/path.txt")
+	data, err := os.ReadFile("/tmp/path.txt")
 	if err != nil {
 		fmt.Println(err)
 	}
 	File_Path = string(data)
 
 	TodoList = readTodos(File_Path)
+
+	// check if files.json exits in the tmp folder or not
+	_, file_path_err := os.Lstat(Files_Path)
+
+	// if files.json doesn't exists- create
+	if file_path_err != nil {
+		default_file := Files{
+			Name: "todos",
+			Path: Tm_Path,
+		}
+		FilesList = append(FilesList, default_file)
+		data, _ := json.Marshal(FilesList)          // default path would be task manager home path
+		err := os.WriteFile(Files_Path, data, 0644) // create by writing default path in dir_path.txt
+		if err != nil {
+			fmt.Printf("Error while creating files.json : %v", err)
+			return
+		}
+	}
+
+	// if dir_path already exists
+
+	// then read the current directory from dir_path.txt
+	data, readingFilesPath_err := os.ReadFile(Files_Path)
+	if readingFilesPath_err != nil {
+		fmt.Println(readingFilesPath_err)
+	}
+	err = json.Unmarshal(data, &FilesList)
+	if err != nil {
+		fmt.Println(err)
+	}
 
 	command := os.Args
 
@@ -100,8 +125,8 @@ func main() {
 		fmt.Println(File_Path)
 		addTodo(newTodos)
 
-	case "list", "ls":
-		listTodos(TodoList)
+	// case "list", "ls":
+	// 	listTodos(TodoList)
 
 	case "rm", "remove":
 		ids := command[2:]
@@ -130,10 +155,9 @@ func main() {
 		} else {
 			first_task = command[3]
 		}
-		fmt.Println(Dir_Path)
 
 		// return the formated file path
-		path_string := fmt.Sprintf("%v/%v.json", Dir_Path, file_name)
+		path_string := fmt.Sprintf("%v/%v.json", Tm_Path, file_name)
 
 		// saves the formated file path in path.txt
 		data := []byte(path_string)
@@ -154,7 +178,6 @@ func main() {
 			Mark_done:  false,
 		}
 		todolist = append(todolist, NewTodo)
-		fmt.Println(todolist)
 		todolist_byte, _ := json.Marshal(todolist)
 
 		// creating the file with first task
@@ -163,35 +186,74 @@ func main() {
 			fmt.Println("Error while creating", path_string, err)
 		}
 
-	case "cf":
+		files := Files{
+			Name: file_name,
+			Path: path_string,
+		}
+		FilesList = append(FilesList, files)
+		fileslist_byte, _ := json.Marshal(FilesList)
+
+		err = os.WriteFile(Files_Path, fileslist_byte, 0644)
+		if err != nil {
+			fmt.Println("Error while creating", path_string, err)
+		}
+
+	case "cat":
 		file_name := command[2]
-		path_string := fmt.Sprintf("%v/%v.json", Dir_Path, file_name)
-		data := []byte(path_string)
-		err := os.WriteFile("/tmp/path.txt", data, 0644)
-		if err != nil {
-			fmt.Printf("Error while changing directory to %v.json : %v", file_name, err)
-			return
+		var file_exist bool = false
+		for _, file := range FilesList {
+			if file_name == file.Name {
+				file_exist = true
+			}
 		}
-	case "cd":
-		dir_name := command[2]
-		path_string := fmt.Sprintf("%v/%v", Dir_Path, dir_name)
-		data := []byte(path_string)
-		err := os.WriteFile("/tmp/dir_path.txt", data, 0644)
-		if err != nil {
-			fmt.Printf("Error while changing directory to %v.json : %v", dir_name, err)
-			return
+		if file_exist {
+			path_string := fmt.Sprintf("%v/%v.json", Tm_Path, file_name)
+			data := []byte(path_string)
+			err := os.WriteFile("/tmp/path.txt", data, 0644)
+			if err != nil {
+				fmt.Printf("Error while changing directory to %v.json : %v", file_name, err)
+				return
+			}
+
+			data, err = os.ReadFile("/tmp/path.txt")
+			if err != nil {
+				fmt.Println(err)
+			}
+			File_Path = string(data)
+
+			TodoList = readTodos(File_Path)
+
+			listTodos(TodoList)
+		} else {
+			fmt.Println("File doesn't exist")
 		}
+	case "lt":
+		listTodos(TodoList)
+	// case "cd":
+	// 	dir_name := command[2]
+	// 	path_string := fmt.Sprintf("%v/%v", Tm_Path, dir_name)
+	// 	data := []byte(path_string)
+	// 	err := os.WriteFile("/tmp/path.txt", data, 0644)
+	// 	if err != nil {
+	// 		fmt.Printf("Error while changing directory to %v.json : %v", dir_name, err)
+	// 		return
+	// 	}
 
 	case "pwd":
 		fmt.Println(File_Path)
-		fmt.Println(Dir_Path)
+		// fmt.Println(Dir_Path)
 
-	case "mkdir":
-		dir_name := command[2]
-		path_string := fmt.Sprintf("%v/%v", Dir_Path, dir_name)
-		err = os.MkdirAll(path_string, 0755)
-		if err != nil {
-			fmt.Println("Error while creating", path_string, err)
+	// case "mkdir":
+	// 	dir_name := command[2]
+	// 	path_string := fmt.Sprintf("%v/%v", Dir_Path, dir_name)
+	// 	err = os.MkdirAll(path_string, 0755)
+	// 	if err != nil {
+	// 		fmt.Println("Error while creating", path_string, err)
+	// 	}
+
+	case "ls", "list":
+		for _, file := range FilesList {
+			fmt.Println(file.Name)
 		}
 
 	default:
@@ -254,18 +316,28 @@ func addTodo(newTodos []string) {
 			fmt.Printf("Added : %v\n", t)
 		}
 	}
+
 }
 
 func listTodos(TodoList []Todo) {
-
-	fmt.Printf("\n---------------- Todo List ------------------\n")
+	var file_name string
+	for _, file := range FilesList {
+		if file.Path == File_Path {
+			file_name = file.Name
+		} else {
+			file_name = File_Path
+		}
+	}
+	fmt.Printf("\n\033[34m----------------\033[0m \033[33mTasks List\033[0m \033[34m------------------\033[0m\n")
 	if len(TodoList) == 0 {
 		fmt.Printf("\n		[ Empty ]				\n\n\nUse this to add tasks in todo list\n-> tm add 'your task'\n")
 	}
+	fmt.Printf("\n")
 	var todo Todo
 	for _, todo = range TodoList {
 		fmt.Printf("[%v] %v%v -> %v\n", todo.Id, todo.Start_time, todo.End_time, todo.Task)
 	}
+	fmt.Printf("\n\033[34m----------------\033[0m \033[33m%v\033[0m \033[34m------------------\033[0m\n", file_name)
 	fmt.Printf("\n")
 }
 
