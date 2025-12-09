@@ -34,7 +34,7 @@ Works like a Linux terminal, but prefixed with `tm`:
 ## 📥 **Installation**
 
 1. **Download the executable**  
-   Grab the binary from the release section (insert link).
+   download from ([here](https://drive.google.com/file/d/1IPxSVK6Vv9Xg3WQYjyF2ZJdzQxWzNIUy/view?usp=drive_link)).
 
 2. **Add it to your system `$PATH`**  
    Add the following line to your `.bashrc`, `.zshrc`, or shell config:
