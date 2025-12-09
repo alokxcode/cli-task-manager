@@ -46,7 +46,7 @@ Works like a Linux terminal, but prefixed with `tm`:
 Add this to your shell config as well:
 
    ```bash
-   alias tm='main'
+   alias tm='task-manager'
    ``````
 
 
