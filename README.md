@@ -16,17 +16,12 @@ Perfect for developers who like terminal workflows or want a lightweight, keyboa
 - Mark tasks as done 
 - List all tasks  
 
-### 📂 **File & Folder Operations**
+### 📂 **File Operations**
 Works like a Linux terminal, but prefixed with `tm`:
 - `tm touch <filename>` → create a file  
-- `tm mkdir <dirname>` → create a directory  
-- `tm ls` → list files/folders/tasks  
-- `tm cd <directory>` → navigate  
+- `tm ls` → list files  
+- `tm cat <file name>` → open file  
 - `tm rm <name>` → remove files/folders  
-- More commands depending on your setup  
-
-### 🧭 **Built-in Navigation System**
-Navigate your task folders just like you would in a Linux shell — no GUI, no distractions.
 
 ### ⚡ **Portable & Fast**
 - Single executable  
@@ -93,15 +88,20 @@ tm done 3
 tm remove 3
 ``````
 
-- Create folders:
+- Create files:
 ```bash  
-tm mkdir projectA
+tm touch projectA
 ``````
 
 
-- Navigate directories:  
+- Navigate files:  
 ```bash
-tm cd projectA
+tm cat projectA
+``````
+
+- List tasks of a file:  
+```bash
+tm lt
 ``````
 
 - List everything:  
