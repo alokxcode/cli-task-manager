@@ -1,7 +1,7 @@
 # **Task Manager CLI (tm)**
 
-A simple, fast, Linux-style **CLI task manager and mini file-system simulator** written in Go.  
-Manage tasks, create folders, organize projects, navigate directories, and work just like a terminal — except every command starts with **`tm`**.
+A simple, fast, Linux-style **CLI task manager with mini file-system simulator** written in Go.  
+Manage tasks, create diffrent files, organize projects, work just like a terminal — except every command starts with **`tm`**.
 
 Perfect for developers who like terminal workflows or want a lightweight, keyboard-driven task manager.
 
@@ -21,7 +21,7 @@ Works like a Linux terminal, but prefixed with `tm`:
 - `tm touch <filename>` → create a file  
 - `tm ls` → list files  
 - `tm cat <file name>` → open file  
-- `tm rm <name>` → remove files/folders  
+- `tm rm <name>` → remove file
 
 ### ⚡ **Portable & Fast**
 - Single executable  
@@ -42,6 +42,9 @@ Works like a Linux terminal, but prefixed with `tm`:
    ```bash
    export PATH="$PATH:/path/to/your/downloaded/executable"
 
+   Replace the path with the path of downloaded executable. - to get the path use pwd
+   example :- /home/manavya/downloads
+   
 3. **Create an alias**  
 Add this to your shell config as well:
 
@@ -58,6 +61,7 @@ Add this to your shell config as well:
 or source the configuration file you edited
 text
 
+Now you can use tm command in any directory ( tm for task manager )
 ---
 
 ## 🧪 Usage Examples
@@ -88,13 +92,13 @@ tm done 3
 tm remove 3
 ``````
 
-- Create files:
+- Create file:
 ```bash  
 tm touch projectA
 ``````
 
 
-- Navigate files:  
+- Open files:  
 ```bash
 tm cat projectA
 ``````
@@ -104,7 +108,7 @@ tm cat projectA
 tm lt
 ``````
 
-- List everything:  
+- List all files:  
 ```bash
 tm ls
 ``````
@@ -129,6 +133,3 @@ Feel free to open pull requests or suggestions.
 
 ---
 
-## 📄 License
-
-Apache
